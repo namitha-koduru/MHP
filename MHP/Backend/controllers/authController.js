@@ -1,35 +1,46 @@
-const Otp = require("../models/Otp");
 const User = require("../models/User");
-const sendSMS = require("../utils/sendSMS");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
-exports.sendOtp = async (req, res) => {
-  const { mobile } = req.body;
-  const otp = Math.floor(100000 + Math.random() * 900000);
-
-  await Otp.create({
-    mobile,
-    otp,
-    expiresAt: new Date(Date.now() + 5 * 60 * 1000)
-  });
-
-  await sendSMS(mobile, `Your MHP OTP is ${otp}`);
-
-  res.json({ message: "OTP sent successfully" });
+const generateToken = (user) => {
+  return jwt.sign(
+    { id: user._id, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
 };
 
-exports.verifyOtp = async (req, res) => {
-  const { mobile, otp } = req.body;
+// Register
+exports.register = async (req, res) => {
+  try {
+    const { name, phone, password } = req.body;
 
-  const record = await Otp.findOne({ mobile, otp });
-  if (!record || record.expiresAt < new Date()) {
-    return res.status(400).json({ success: false });
+    const user = await User.create({ name, phone, password });
+
+    const token = generateToken(user);
+
+    res.status(201).json({ user, token });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
+};
 
-  await User.findOneAndUpdate(
-    { mobile },
-    { mobile },
-    { upsert: true }
-  );
+// Login
+exports.login = async (req, res) => {
+  try {
+    const { phone, password } = req.body;
 
-  res.json({ success: true, message: "Login successful" });
+    const user = await User.findOne({ phone });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch)
+      return res.status(400).json({ message: "Invalid credentials" });
+
+    const token = generateToken(user);
+
+    res.json({ user, token });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
