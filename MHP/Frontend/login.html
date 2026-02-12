@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MHP Login</title>
+<style>
+body{font-family:Arial;background:#f2f2f2;display:flex;justify-content:center;align-items:center;height:100vh}
+.box{background:#fff;padding:25px;border-radius:10px;width:300px;box-shadow:0 0 10px #aaa;text-align:center}
+input{width:90%;padding:8px;margin:6px 0}
+button{padding:8px 15px;background:#27ae60;color:#fff;border:none;cursor:pointer}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+<h2>MHP OTP Login</h2>
+<input id="mobile" placeholder="Enter mobile number"><br>
+<button onclick="sendOTP()">Send OTP</button>
+
+<div id="otpBox" style="display:none">
+  <input id="otp" placeholder="Enter OTP"><br>
+  <button onclick="verifyOTP()">Verify OTP</button>
+</div>
+</div>
+
+<script>
+const API = "http://localhost:5000/api";
+
+function sendOTP(){
+ const mobile=document.getElementById("mobile").value;
+ fetch(API+"/auth/send-otp",{
+  method:"POST",
+  headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({mobile})
+ })
+ .then(r=>r.json()).then(d=>{
+  alert(d.message);
+  document.getElementById("otpBox").style.display="block";
+ });
+}
+
+function verifyOTP(){
+ const mobile=document.getElementById("mobile").value;
+ const otp=document.getElementById("otp").value;
+
+ fetch(API+"/auth/verify-otp",{
+  method:"POST",
+  headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({mobile,otp})
+ })
+ .then(r=>r.json()).then(d=>{
+  if(d.success){
+    localStorage.setItem("mhpUser",mobile);
+    window.location.href="canteen.html";
+  }else alert("Invalid OTP");
+ });
+}
+</script>
+
+</body>
+</html>
