@@ -6,10 +6,12 @@ function App() {
 
   useEffect(() => {
     axios
-      .get("https://mhp-backend-v88j.onrender.com")
-      .then((res) => setMessage(res.data.message))
+      .get("https://mhp-backend-v88j.onrender.com/api/status")
+      .then((res) => {
+        setMessage(res.data.message);
+      })
       .catch((err) => {
-        console.error(err);
+        console.error("Backend error:", err);
         setMessage("Error connecting to backend");
       });
   }, []);
