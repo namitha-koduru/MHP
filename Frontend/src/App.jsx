@@ -6,7 +6,7 @@ function App() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/status")
+      .get("https://mhp-backend-v88j.onrender.com")
       .then((res) => setMessage(res.data.message))
       .catch((err) => {
         console.error(err);
