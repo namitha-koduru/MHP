@@ -1,33 +1,52 @@
+console.log("RUNNING FILE:", __filename);
+console.log("🔥 THIS SERVER FILE IS RUNNING");
+
 const express = require("express");
 const cors = require("cors");
+const morgan = require("morgan");
 require("dotenv").config();
+
+const connectDB = require("./config/db");
+
+const authRoutes = require("./routes/authRoutes");
+const orderRoutes = require("./routes/orderRoutes");
+const menuRoutes = require("./routes/menuRoutes");
+const adminOrderRoutes = require("./routes/adminOrderRoutes");
 
 const app = express();
 
-/* ---------------- CORS CONFIG ---------------- */
+/* ---------------- DATABASE ---------------- */
+connectDB();
+
+/* ---------------- MIDDLEWARE ---------------- */
+app.use(express.json());
+
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    "https://mhp-rust.vercel.app"  // ⚠ replace if your vercel URL is different
+    "https://mhp-rust.vercel.app"
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 }));
 
-app.use(express.json());
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+}
+
+/* ---------------- ROUTES ---------------- */
+app.use("/api/auth", authRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/menu", menuRoutes);
+
+/* ✅ ADMIN ROUTES (ONLY THIS ONE) */
+app.use("/api/admin", adminOrderRoutes);
 
 /* ---------------- TEST ROUTE ---------------- */
 app.get("/api/status", (req, res) => {
   res.json({ message: "Backend Connected Successfully 🚀" });
 });
-
-/* ---------------- ROUTES ---------------- */
-const authRoutes = require("./routes/authRoutes");
-const orderRoutes = require("./routes/orderRoutes");
-
-app.use("/api/auth", authRoutes);
-app.use("/api/orders", orderRoutes);
 
 /* ---------------- SERVER ---------------- */
 const PORT = process.env.PORT || 5000;
