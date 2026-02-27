@@ -1,41 +1,43 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+"use client";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import UserLayout from "./layouts/UserLayoutTest.jsx";
+import AdminLayout from "./layouts/AdminLayout";
+
+import Home from "./pages/Home";
+import Menu from "./pages/Menu";
+import Cart from "./pages/Cart";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+
+import Dashboard from "./pages/admin/Dashboard";
+import MenuManage from "./pages/admin/MenuManage";
+import Orders from "./pages/admin/Orders";
 
 function App() {
-  const [message, setMessage] = useState("Loading...");
-
-  useEffect(() => {
-    axios
-      .get("https://mhp-backend-v88j.onrender.com/api/status")
-      .then((res) => {
-        setMessage(res.data.message);
-      })
-      .catch((err) => {
-        console.error("Backend error:", err);
-        setMessage("Error connecting to backend");
-      });
-  }, []);
-
   return (
-    <div style={{
-      height: "100vh",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      background: "linear-gradient(135deg, #4f46e5, #9333ea)"
-    }}>
-      <div style={{
-        background: "white",
-        padding: "40px",
-        borderRadius: "20px",
-        textAlign: "center",
-        boxShadow: "0 20px 40px rgba(0,0,0,0.2)"
-      }}>
-        <h1>MHP Project</h1>
-        <p>{message}</p>
-      </div>
-    </div>
+    <BrowserRouter>
+      <Routes>
+
+        <Route element={<UserLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/menu" element={<Menu />} />
+          <Route path="/cart" element={<Cart />} />
+        </Route>
+
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="menu" element={<MenuManage />} />
+          <Route path="orders" element={<Orders />} />
+        </Route>
+
+      </Routes>
+    </BrowserRouter>
   );
 }
+
 
 export default App;
