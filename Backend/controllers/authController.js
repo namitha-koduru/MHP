@@ -2,6 +2,8 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+/* -------- GENERATE TOKEN -------- */
+
 const generateToken = (user) => {
   return jwt.sign(
     { id: user._id, role: user.role },
@@ -10,37 +12,84 @@ const generateToken = (user) => {
   );
 };
 
-// Register
-exports.register = async (req, res) => {
-  try {
-    const { name, phone, password } = req.body;
+/* ---------------- REGISTER ---------------- */
 
-    const user = await User.create({ name, phone, password });
+exports.register = async (req, res) => {
+
+  try {
+
+    const { name, regId, phone, password, role } = req.body;
+
+    const existingUser = await User.findOne({ phone });
+
+    if (existingUser) {
+      return res.status(400).json({
+        message: "User already exists"
+      });
+    }
+
+    const user = await User.create({
+      name,
+      regId,
+      phone,
+      password,
+      role
+    });
 
     const token = generateToken(user);
 
-    res.status(201).json({ user, token });
+    res.status(201).json({
+      message: "Account created successfully",
+      user,
+      token
+    });
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+
+    res.status(500).json({
+      message: error.message
+    });
+
   }
 };
 
-// Login
+/* ---------------- LOGIN ---------------- */
+
 exports.login = async (req, res) => {
+
   try {
+
     const { phone, password } = req.body;
 
     const user = await User.findOne({ phone });
-    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found"
+      });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch)
-      return res.status(400).json({ message: "Invalid credentials" });
+
+    if (!isMatch) {
+      return res.status(400).json({
+        message: "Invalid credentials"
+      });
+    }
 
     const token = generateToken(user);
 
-    res.json({ user, token });
+    res.json({
+      message: "Login successful",
+      user,
+      token
+    });
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+
+    res.status(500).json({
+      message: error.message
+    });
+
   }
 };

@@ -16,7 +16,7 @@ router.post("/", async (req, res) => {
 /* -------- GET ALL MENU ITEMS -------- */
 router.get("/", async (req, res) => {
   try {
-    const items = await Menu.find();
+    const items = await Menu.find({ isAvailable: true });
     res.json(items);
   } catch (err) {
     res.status(500).json({ message: err.message });
