@@ -25,8 +25,7 @@ app.use(express.json());
 app.use(morgan("dev"));
 
 /* ROUTES */
-
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/orders", orderRoutes);
 app.use("/api/menu", menuRoutes);
 app.use("/api/admin", adminOrderRoutes);

@@ -10,7 +10,8 @@ const userSchema = new mongoose.Schema(
 
   regId: {
     type: String,
-    required: true
+    required: true,
+    unique: true
   },
 
   phone: {
@@ -29,18 +30,22 @@ const userSchema = new mongoose.Schema(
     enum: ["student", "faculty", "admin"],
     default: "student"
   }
+
 },
 { timestamps: true }
 );
 
-/* -------- HASH PASSWORD BEFORE SAVE -------- */
 
-userSchema.pre("save", async function () {
+/* HASH PASSWORD */
 
-  if (!this.isModified("password")) return;
+userSchema.pre("save", async function (next) {
+
+  if (!this.isModified("password")) return next();
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
+
+  next();
 
 });
 

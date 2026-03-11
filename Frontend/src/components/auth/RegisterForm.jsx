@@ -1,65 +1,105 @@
-import { useState } from "react"
-import { useAuth } from "@/context/AuthContext"
-import { useNavigate } from "react-router-dom"
+import { useState } from "react";
+import { registerUser } from "@/services/authService";
+import { useNavigate } from "react-router-dom";
 
-export default function RegisterForm(){
+export default function RegisterForm() {
 
-  const { login } = useAuth()
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const [form,setForm]=useState({
-    role:"",
+  const [form,setForm] = useState({
     name:"",
-    regid:"",
-    mobile:""
-  })
+    regId:"",
+    phone:"",
+    password:"",
+    role:"student"
+  });
 
-  const handleSubmit=()=>{
+  const handleChange = (e)=>{
+    setForm({...form,[e.target.name]:e.target.value});
+  };
 
-    login(form)
+  const handleRegister = async ()=>{
 
-    navigate("/")
-  }
+    try{
 
-  return(
+      const res = await registerUser(form);
 
-    <div className="space-y-3">
+      alert("Account created successfully");
 
-      <select
-        className="w-full border p-2 rounded"
-        onChange={(e)=>setForm({...form,role:e.target.value})}
-      >
-        <option>Select Role</option>
-        <option>Student</option>
-        <option>Faculty</option>
-      </select>
+      /* Navigate to login page */
 
-      <input
-        placeholder="Name"
-        className="w-full border p-2 rounded"
-        onChange={(e)=>setForm({...form,name:e.target.value})}
-      />
+      navigate("/login");
 
-      <input
-        placeholder="Registration ID"
-        className="w-full border p-2 rounded"
-        onChange={(e)=>setForm({...form,regid:e.target.value})}
-      />
+    }catch(err){
 
-      <input
-        placeholder="Mobile Number"
-        className="w-full border p-2 rounded"
-        onChange={(e)=>setForm({...form,mobile:e.target.value})}
-      />
+      alert(err.response?.data?.message || "Registration failed");
 
-      <button
-        onClick={handleSubmit}
-        className="w-full bg-indigo-500 text-white p-2 rounded"
-      >
-        Register
-      </button>
+    }
+
+  };
+
+  return (
+
+    <div className="flex items-center justify-center min-h-screen bg-gray-200">
+
+      <div className="bg-white p-8 rounded-xl shadow-md w-[400px]">
+
+        <h2 className="text-xl font-bold text-center mb-2">
+          Create Account
+        </h2>
+
+        <p className="text-center text-gray-500 mb-6">
+          Enter your details to register
+        </p>
+
+        {/* NAME */}
+        <label className="text-sm font-medium">Name</label>
+        <input
+          name="name"
+          placeholder="Enter your name"
+          className="w-full border p-2 rounded mb-3"
+          onChange={handleChange}
+        />
+
+        {/* REG ID */}
+        <label className="text-sm font-medium">Registration Number</label>
+        <input
+          name="regId"
+          placeholder="Enter your registration number"
+          className="w-full border p-2 rounded mb-3"
+          onChange={handleChange}
+        />
+
+        {/* PHONE */}
+        <label className="text-sm font-medium">Mobile Number</label>
+        <input
+          name="phone"
+          placeholder="Enter your mobile number"
+          className="w-full border p-2 rounded mb-3"
+          onChange={handleChange}
+        />
+
+        {/* PASSWORD */}
+        <label className="text-sm font-medium">Password</label>
+        <input
+          type="password"
+          name="password"
+          placeholder="Enter password"
+          className="w-full border p-2 rounded mb-5"
+          onChange={handleChange}
+        />
+
+        {/* BUTTON */}
+        <button
+          onClick={handleRegister}
+          className="w-full bg-black text-white p-2 rounded"
+        >
+          Register
+        </button>
+
+      </div>
 
     </div>
 
-  )
+  );
 }
